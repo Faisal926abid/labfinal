@@ -1,32 +1,17 @@
 version: 0.2
 
-env:
-  variables:
-    ImageName: flask-app
-
 phases:
   pre_build:
     commands:
-      - echo Logging in to Amazon ECR...
-      - aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 767397832363.dkr.ecr.us-east-1.amazonaws.com
-      - echo Login succeeded.
-
+      - echo "Logging in to Amazon ECR as root..."
+      - export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID     # Passed via env vars
+      - export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
+      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
   build:
     commands:
-      - echo Building the Docker image...
-      - docker build -t $ImageName -f ./Dockerfile .
-
+      - docker build -t $REPOSITORY_URI:latest .
+      - docker tag $REPOSITORY_URI:latest $REPOSITORY_URI:$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
   post_build:
     commands:
-      - echo Tagging the Docker image...
-      - docker tag $ImageName:latest 767397832363.dkr.ecr.us-east-1.amazonaws.com/$ImageName:latest
-      - echo Pushing the Docker image to ECR...
-      - docker push 767397832363.dkr.ecr.us-east-1.amazonaws.com/$ImageName:latest
-      - echo Build completed successfully.
-
-artifacts:
-  files:
-    - Dockerfile
-    - app.py
-    - app1.py
-
+      - docker push $REPOSITORY_URI:latest
+      - docker push $REPOSITORY_URI:$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
