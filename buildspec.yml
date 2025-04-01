@@ -3,10 +3,10 @@ version: 0.2
 env:
   variables:
     AWS_REGION: us-east-1               # Replace with your region
-    AWS_ACCOUNT_ID: 767397832363        # Replace with your AWS account ID
-    ECR_REPO_NAME: flask-app          # Replace with your ECR repository name
-    ECS_CLUSTER_NAME: ecs-cluster50        # Replace with your ECS cluster name
-    ECS_SERVICE_NAME: ecs-service        # Replace with your ECS service name
+    AWS_ACCOUNT_ID: 767397832363                # Replace with your AWS account ID
+    ECR_REPO_NAME: flask-app            # Make sure this matches the name of your ECR repo
+    ECS_CLUSTER_NAME: ecs-cluster50     # Replace with your ECS cluster name
+    ECS_SERVICE_NAME: ecs-service       # Replace with your ECS service name
 
 phases:
   install:
@@ -23,8 +23,8 @@ phases:
   build:
     commands:
       - echo Building Docker image...
-      - docker build -t my-app .
-      - docker tag my-app:latest $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPO_NAME:latest
+      - docker build -t flask-app .                       # Match the repo name here
+      - docker tag flask-app:latest $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPO_NAME:latest
       
   post_build:
     commands:
