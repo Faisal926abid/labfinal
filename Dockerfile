@@ -1,17 +1,6 @@
-# Use official Python image from Amazon ECR Public
-FROM public.ecr.aws/docker/library/python:3.9
-
-# Set working directory
+FROM python:3.9-slim
 WORKDIR /app
-
-# Copy all files
-COPY . .
-
-# Install dependencies
+COPY requirements.txt .
 RUN pip install -r requirements.txt
-
-# Expose the port
-EXPOSE 5000
-
-# Command to run the app
+COPY . .
 CMD ["python", "app.py"]
