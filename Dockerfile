@@ -1,17 +1,17 @@
-# Use official Python image
-FROM python:3.9
+# Use official Python image from Amazon ECR Public
+FROM public.ecr.aws/docker/library/python:3.9
 
 # Set working directory
 WORKDIR /app
 
-# Copy application files
-COPY app.py .
+# Copy all files
+COPY . .
 
-# Install Flask
-RUN pip install flask
+# Install dependencies
+RUN pip install -r requirements.txt
 
-# Expose port
+# Expose the port
 EXPOSE 5000
 
-# Run the Flask app
+# Command to run the app
 CMD ["python", "app.py"]
