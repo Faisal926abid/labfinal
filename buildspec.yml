@@ -1,7 +1,7 @@
 version: 0.2
 
 phases:
-    pre_build:
+  pre_build:
     commands:
       - echo "Authenticating with ECR..."
       - echo "AWS Region: $AWS_DEFAULT_REGION"
