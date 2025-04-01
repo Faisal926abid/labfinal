@@ -7,7 +7,7 @@ env:
     ECR_REPO_NAME: flask-app
     ECS_CLUSTER_NAME: ecs-cluster50
     ECS_SERVICE_NAME: ecs-service
-    DOCKER_USERNAME: sultanulkabir       # Replace with your Docker Hub username
+    DOCKER_USERNAME: sultanulkabir    # Replace with your Docker Hub username
     DOCKER_PASSWORD: Dhaka0781!       # Replace with your Docker Hub password (for testing only)
 
 phases:
@@ -34,8 +34,16 @@ phases:
     commands:
       - echo Pushing Docker image to Amazon ECR...
       - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPO_NAME:latest
-      - echo Updating ECS Service...
+      
+      - echo Registering new task definition revision in ECS...
+      - export TASK_DEFINITION=$(aws ecs describe-task-definition --task-definition $ECS_SERVICE_NAME)
+      - export NEW_TASK_DEFINITION=$(echo $TASK_DEFINITION | jq --arg IMAGE_URI "$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPO_NAME:latest" '.taskDefinition | .containerDefinitions[0].image = $IMAGE_URI')
+      - echo $NEW_TASK_DEFINITION > new-task-def.json
+      - aws ecs register-task-definition --cli-input-json file://new-task-def.json
+      
+      - echo Updating ECS Service to use the new task definition...
       - aws ecs update-service --cluster $ECS_CLUSTER_NAME --service $ECS_SERVICE_NAME --force-new-deployment
 
 artifacts:
-  files: "**/*"
+  files:
+    - "**/*"
