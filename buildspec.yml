@@ -2,36 +2,31 @@ version: 0.2
 
 env:
   variables:
-    AWS_REGION: us-east-1
-    AWS_ACCOUNT_ID: 767397832363
-    ECR_REPO_NAME: flask-app
-    ECS_CLUSTER_NAME: ecs-cluster50
-    ECS_SERVICE_NAME: ecs-service
+    ImageName: flask-app
 
 phases:
-  install:
-    runtime-versions:
-      docker: 20
-    commands:
-      - echo Installing dependencies...
-
   pre_build:
     commands:
       - echo Logging in to Amazon ECR...
-      - aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
+      - aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 767397832363.dkr.ecr.us-east-1.amazonaws.com
+      - echo Login succeeded.
 
   build:
     commands:
-      - echo Building Docker image...
-      - docker build -t $ECR_REPO_NAME:latest -f ./Dockerfile .
-      - docker tag $ECR_REPO_NAME:latest $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPO_NAME:latest
+      - echo Building the Docker image...
+      - docker build -t $ImageName -f ./Dockerfile .
 
   post_build:
     commands:
-      - echo Pushing Docker image to Amazon ECR...
-      - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPO_NAME:latest
-      - echo Updating ECS Service...
-      - aws ecs update-service --cluster $ECS_CLUSTER_NAME --service $ECS_SERVICE_NAME --force-new-deployment
+      - echo Tagging the Docker image...
+      - docker tag $ImageName:latest 767397832363.dkr.ecr.us-east-1.amazonaws.com/$ImageName:latest
+      - echo Pushing the Docker image to ECR...
+      - docker push 767397832363.dkr.ecr.us-east-1.amazonaws.com/$ImageName:latest
+      - echo Build completed successfully.
 
 artifacts:
-  files: "**/*"
+  files:
+    - Dockerfile
+    - app.py
+    - app1.py
+
