@@ -5,20 +5,17 @@ phases:
     commands:
       - echo Logging in to Amazon ECR...
       - aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 767397832363.dkr.ecr.us-east-1.amazonaws.com
-      - echo Setting environment variables...
-      - REPOSITORY_NAME=flask-app  # Replace with your actual ECR repository name
-      - IMAGE_TAG=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
-      - echo Repository Name: $REPOSITORY_NAME
-      - echo Image Tag: $IMAGE_TAG
+      - echo Repository Name: flask-app
+      - echo Image Tag: latest
   build:
     commands:
       - echo Building Docker image...
-      - docker build -t $REPOSITORY_NAME:$IMAGE_TAG .
-      - docker tag $REPOSITORY_NAME:$IMAGE_TAG 767397832363.dkr.ecr.us-east-1.amazonaws.com/$REPOSITORY_NAME:$IMAGE_TAG
+      - docker build -t flask-app:latest .
+      - docker tag flask-app:latest 767397832363.dkr.ecr.us-east-1.amazonaws.com/flask-app:latest
   post_build:
     commands:
       - echo Pushing Docker image to ECR...
-      - docker push 767397832363.dkr.ecr.us-east-1.amazonaws.com/$REPOSITORY_NAME:$IMAGE_TAG
+      - docker push 767397832363.dkr.ecr.us-east-1.amazonaws.com/flask-app:latest
 
 artifacts:
   files:
