@@ -3,18 +3,20 @@ version: 0.2
 phases:
   pre_build:
     commands:
-      - echo "Authenticating with ECR..."
-      - echo "AWS Region: $AWS_DEFAULT_REGION"
-      - echo "Account ID: $AWS_ACCOUNT_ID"
-      - aws sts get-caller-identity
-      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
-      
+      - echo Logging in to Amazon ECR...
+      - aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 767397832363.dkr.ecr.us-east-1.amazonaws.com
+      - REPOSITORY_NAME="flask app"
+      - IMAGE_TAG=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
   build:
     commands:
-      - docker build -t $REPOSITORY_URI:latest .
-      - docker tag $REPOSITORY_URI:latest $REPOSITORY_URI:$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
-      
+      - echo Building Docker image...
+      - docker build -t $REPOSITORY_NAME:$IMAGE_TAG .
+      - docker tag $REPOSITORY_NAME:$IMAGE_TAG 767397832363.dkr.ecr.us-east-1.amazonaws.com/$REPOSITORY_NAME:$IMAGE_TAG
   post_build:
     commands:
-      - docker push $REPOSITORY_URI:latest
-      - docker push $REPOSITORY_URI:$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
+      - echo Pushing Docker image to ECR...
+      - docker push 767397832363.dkr.ecr.us-east-1.amazonaws.com/$REPOSITORY_NAME:$IMAGE_TAG
+artifacts:
+  files:
+    - app.py
+    - Dockerfile
